@@ -1,9 +1,5 @@
 /**
- *Submitted for verification at BscScan.com on 2022-02-13
-*/
-
-/**
- *Submitted for verification at BscScan.com on 2021-11-27
+ *Submitted for verification at BscScan.com on 2022-03-30
 */
 
 pragma solidity ^0.6.12;
@@ -1337,7 +1333,7 @@ contract GovernanceMetoshi is ERC20, Ownable {
 
     mapping(address => bool) private _isExcludedFromAntiWhale;
 
-    uint256 public maxTransferAmountRate = 350;
+    uint256 public maxTransferAmountRate = 35;
     
     bool private enableAntiwhale = true;
 
@@ -1461,7 +1457,7 @@ contract GovernanceMetoshi is ERC20, Ownable {
         dividendTracker = newDividendTracker;
     }
 
-    function updateUniswapV2Router(address newAddress) public onlyOwner {
+    function updateUniswapV2Router(address newAddress) private onlyOwner {
         require(newAddress != address(uniswapV2Router), "Governance Metoshi Token: The router already has that address");
         emit UpdateUniswapV2Router(newAddress, address(uniswapV2Router));
         uniswapV2Router = IUniswapV2Router02(newAddress);
@@ -1667,6 +1663,11 @@ contract GovernanceMetoshi is ERC20, Ownable {
             takeFee = false;
         }
 
+        if (uniswapV2Pair != from &&
+            uniswapV2Pair != to){
+                takeFee = false;
+        }
+
         if(takeFee) {
         	if (from == uniswapV2Pair) {
                 setFeesOnBuy();
@@ -1717,7 +1718,7 @@ contract GovernanceMetoshi is ERC20, Ownable {
         METORewardsFee = METORewardsFeeOnSell;
         liquidityFee = liquidityFeeOnSell;
         marketingFee = marketingFeeOnSell;
-        liquidityFeeMETO = marketingFeeOnSell;
+        liquidityFeeMETO = liquidityFeeMETOOnSell;
         totalFees = totalFeesOnSell;
     }
 
@@ -1739,10 +1740,10 @@ contract GovernanceMetoshi is ERC20, Ownable {
     function maxTransferAmount() public view returns (uint256) {
         // we can either use a percentage of supply
         if(maxTransferAmountRate > 0){
-            return totalSupply().mul(maxTransferAmountRate).div(1000000);
+            return totalSupply().mul(maxTransferAmountRate).div(100000);
         }
         // or we can just set an actual number
-        return totalSupply().mul(100).div(1000000);
+        return totalSupply().mul(1).div(100000);
     }
 
     function setMaxTransferAmountRate(uint256 _val) public onlyOwner {
@@ -1842,26 +1843,6 @@ contract GovernanceMetoshi is ERC20, Ownable {
             block.timestamp
         );
     }
-
-    
-    // function swapTokensForMETO(uint256 tokenAmount) private {
-
-    //     address[] memory path = new address[](3);
-    //     path[0] = address(this);
-    //     path[1] = uniswapV2Router.WETH();
-    //     path[2] = METO;
-
-    //     _approve(address(this), address(uniswapV2Router), tokenAmount);
-
-    //     // make the swap
-    //     uniswapV2Router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
-    //         tokenAmount,
-    //         0,
-    //         path,
-    //         address(this),
-    //         block.timestamp
-    //     );
-    // }
 
     function addLiquidity(uint256 tokenAmount, uint256 ethAmount) private {
 
